@@ -138,6 +138,16 @@ function getMyLocation(){const msg=document.getElementById("gpsMessage");if(!nav
 function stopGps(){if(watchId!==null){navigator.geolocation.clearWatch(watchId);watchId=null}document.getElementById("gpsMessage").textContent="GPS tracking stopped. This starter page does not share your location."}
 function renderFriends(){document.getElementById("friendsList").innerHTML="<p class='muted'>Live friend search will work after secure sign-in and a shared database are connected.</p>"}
 searchPlaces();
+  // Firebase setup
+const firebaseConfig = {
+  apiKey: "AIzaSyBkQJf4lgJ9S0xZgT3w_DG2tZV12uujNRo",
+  authDomain: "campus-finder-af727.firebaseapp.com",
+  projectId: "campus-finder-af727",
+  storageBucket: "campus-finder-af727.firebasestorage.app",
+  messagingSenderId: "1111047626",
+  appId: "1:1111047626:web:8b1bb1c39121999493a333",
+  measurementId: "G-ZZSB5QPT1X"
+};
 </script>
 </body>
 </html>
