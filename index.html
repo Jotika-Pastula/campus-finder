@@ -2,159 +2,91 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Campus Finder | ECET</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
-:root{--navy:#102b5c;--blue:#2563eb;--pale:#eff6ff;--ink:#172554;--muted:#64748b}
-*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f1f5f9;color:var(--ink)}
-header{padding:30px 18px;text-align:center;color:#fff;background:linear-gradient(135deg,#102b5c,#2563eb)}
-header h1{margin:0 0 8px;font-size:clamp(27px,5vw,38px)}header p{margin:0;color:#dbeafe}
-nav{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;padding:13px;background:white;position:sticky;top:0;z-index:5;box-shadow:0 2px 10px #0000000b}
-button{border:0;border-radius:9px;padding:12px 16px;background:var(--blue);color:white;font-weight:700;cursor:pointer}button.secondary{background:#475569}button.light{background:var(--pale);color:#1d4ed8}
-main{max-width:1000px;margin:24px auto;padding:0 14px}.panel{background:white;border-radius:16px;padding:20px;margin-bottom:18px;box-shadow:0 4px 16px #00000009}
-input,select{width:100%;padding:13px;border:1px solid #cbd5e1;border-radius:9px;margin:8px 0;font-size:16px;background:white}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}.place,.friend{padding:16px;border:1px solid #e2e8f0;border-left:4px solid var(--blue);border-radius:11px;margin:10px 0}.place h3,.friend h3{margin:0 0 8px}.place p,.friend p{margin:6px 0;color:#475569;line-height:1.45}.tag{display:inline-block;border-radius:20px;background:#dbeafe;color:#1d4ed8;padding:5px 9px;font-size:12px}
-.muted{color:var(--muted);font-size:14px;line-height:1.5}.hidden{display:none!important}#map{height:340px;border-radius:12px;margin-top:14px;background:#e2e8f0}.notice{background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:12px;color:#92400e;line-height:1.5}footer{text-align:center;padding:24px;color:var(--muted)}
+*{box-sizing:border-box}body{margin:0;font-family:Arial;background:#f1f5f9;color:#172554}header{background:linear-gradient(135deg,#102b5c,#2563eb);color:white;text-align:center;padding:25px 12px}main{max-width:950px;margin:20px auto;padding:0 12px}.panel{background:white;border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:0 3px 12px #0001}button{border:0;border-radius:8px;background:#2563eb;color:white;padding:11px 15px;margin:5px 3px;cursor:pointer}input,select{width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:8px;margin:6px 0 12px}nav{text-align:center;background:white;padding:10px;position:sticky;top:0}#map{height:300px;border-radius:10px;margin-top:12px}.place{padding:12px;border:1px solid #e2e8f0;border-radius:9px;margin:8px 0}.muted{color:#64748b;font-size:14px}.hidden{display:none!important}footer{text-align:center;padding:20px}
 </style>
 </head>
 <body>
-<header><h1>📍 CAMPUS FINDER</h1><p>Find campus places. Connect with your friends.</p><p style="margin-top:8px">Eluru College of Engineering and Technology</p></header>
+<header><h1>📍 CAMPUS FINDER</h1><p>Find campus places. Connect with your friends.</p><p>Eluru College of Engineering and Technology</p></header>
 <nav><button onclick="showTab('campus')">🏫 Campus Finder</button><button onclick="showTab('friends')">👫 Friends Finder</button></nav>
 <main>
 <section id="campus" class="panel">
-<h2>Find a campus place</h2><p class="muted">Search room numbers, labs, departments and facilities.</p>
-<div class="grid"><input id="search" placeholder="Try Room 415, canteen, computer lab..." oninput="searchPlaces()">
-<select id="floor" onchange="searchPlaces()"><option value="">All floors</option><option>Ground Floor</option><option>Second Floor</option><option>Third Floor</option><option>Fourth Floor</option></select></div>
-<div class="grid"><select id="category" onchange="searchPlaces()"><option value="">All categories</option><option>Classroom</option><option>Laboratory</option><option>Department</option><option>Washroom</option><option>Staff Room</option><option>Office</option><option>Facility</option><option>Food</option><option>Placement</option><option>Medical</option><option>Hall</option><option>Store</option><option>Library</option></select></div>
-<p id="placeCount" class="muted"></p><div id="places"></div>
+<h2>Find a campus place</h2>
+<input id="search" placeholder="Search room, canteen, lab..." oninput="searchPlaces()">
+<select id="floor" onchange="searchPlaces()"><option value="">All floors</option><option>Ground Floor</option><option>Second Floor</option><option>Third Floor</option><option>Fourth Floor</option></select>
+<div id="results"></div>
 </section>
 <section id="friends" class="panel hidden">
-<h2>Friends Finder</h2>
-<div class="notice"><b>Privacy:</b> Friends can only be shown when they choose to share their location. This starter version can show your own GPS location on this device; shared live friend locations require a secure sign-in and online database, which are not connected yet.</div>
-<div class="grid" style="margin-top:12px"><div><label for="myName">Your display name (optional)</label><input id="myName" placeholder="Enter your name"></div><div><label for="friendSearch">Search a friend</label><input id="friendSearch" placeholder="Friend name" oninput="renderFriends()"></div></div>
-<button onclick="getMyLocation()">📍 Get My GPS Location</button> <button class="secondary" onclick="stopGps()">Stop GPS</button>
-<p id="gpsMessage" class="muted" aria-live="polite">GPS has not been started.</p><div id="map"></div>
-<h3>Shared friends</h3><div id="friendsList"><p class="muted">No shared friends yet. Connect Firebase authentication and a database to enable friend-to-friend sharing.</p></div>
+<h2>👫 Friends Finder</h2>
+<p class="muted">Create an account or sign in. Share your location only when you choose. Only use this with trusted classmates.</p>
+<label>Email</label><input id="email" type="email" placeholder="Your email">
+<label>Password</label><input id="password" type="password" placeholder="At least 6 characters">
+<button onclick="signup()">Create account</button><button onclick="login()">Sign in</button><button onclick="logout()">Sign out</button>
+<p id="authMsg" class="muted">Not signed in.</p>
+<hr>
+<button onclick="shareLocation()">📍 Share my location</button><button onclick="stopSharing()">Stop sharing</button>
+<p id="gpsMsg" class="muted">Location sharing is off.</p>
+<div id="map"></div><h3>Shared locations</h3><div id="friendList">Sign in to check shared locations.</div>
 </section>
 </main>
-<footer>Campus Finder · Built for ECET students ❤️</footer>
+<footer>Campus Finder · Built for ECET students 💗</footer>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script type="module">
-const places = [
-["Main Entrance Gate","Main Gate","Ground Floor","Facility","Main campus entrance."],
-["Canteen","Canteen area","Ground Floor","Food","Campus food and refreshment area."],
-["Power Room","Near canteen","Ground Floor","Facility","Near the canteen."],
-["Staff Bike Parking","Parking area","Ground Floor","Facility","Staff bike parking."],
-["Library","Room 101","Ground Floor","Library","Opposite the Principal cabin."],
-["Mechanical Classroom","Room 102","Ground Floor","Classroom","Library is next to this room."],
-["S&H HOD Room","Room 103","Ground Floor","Department","Science and Humanities department."],
-["Entrance Area","Room 104","Ground Floor","Facility","Entrance area."],
-["PA to Principal & Exam Cell","Room 105","Ground Floor","Office","Principal's PA and Exam Cell."],
-["Principal Room","Room 106","Ground Floor","Office","Principal's office."],
-["Office Room","Room 107","Ground Floor","Office","College office."],
-["Chairperson / Secretary Board Room","Room 108","Ground Floor","Office","Board room."],
-["Stationery Store","Room 109","Ground Floor","Store","Stationery store."],
-["Mechanics of Solids and Metallurgy Lab","Room 110","Ground Floor","Laboratory","Mechanical engineering laboratory."],
-["MECH HOD Department","Room 111","Ground Floor","Department","Mechanical department HOD."],
-["MECH Classroom","Room 112","Ground Floor","Classroom","Mechanical engineering classroom."],
-["Electrical Machines Lab","Room 113(A)","Ground Floor","Laboratory","Electrical machines laboratory."],
-["Central Store","Room 115","Ground Floor","Store","College central store."],
-["EEE Classroom","Rooms 116–117","Ground Floor","Classroom","Electrical and Electronics Engineering."],
-["EEE HOD Department","Room 118","Ground Floor","Department","EEE department HOD."],
-["Classrooms","Rooms 119–120","Ground Floor","Classroom","College classrooms."],
-["Training & Placement Room","Room 121","Ground Floor","Placement","Training and placement room."],
-["Drinking Water Point","Right side of Main Steps","Ground Floor","Facility","Water points are reported on the right side of the main steps on each floor."],
-["Girls Waiting Hall","Room 201","Second Floor","Facility","CSE floor."],
-["CSE Staff Room","Room 202","Second Floor","Staff Room","CSE staff room."],
-["Classroom","Room 203","Second Floor","Classroom","CSE floor."],
-["First Aid Centre","Room 204","Second Floor","Medical","First aid facility."],
-["Computer Lab","Room 205","Second Floor","Laboratory","Computer laboratory."],
-["Computer Lab","Room 206","Second Floor","Laboratory","Computer laboratory."],
-["CSE HOD Department","Room 207","Second Floor","Department","Computer Science department HOD."],
-["CSE Seminar Hall","Room 208","Second Floor","Hall","CSE seminar hall."],
-["Staff Room","Room 209","Second Floor","Staff Room","Staff room."],
-["Classrooms","Rooms 210–219","Second Floor","Classroom","CSE classrooms; drinking water nearby."],
-["Physical Director","Room 220","Second Floor","Office","Physical Director's room."],
-["Drawing Hall","Room 221","Second Floor","Hall","Drawing hall."],
-["Computer Lab","Room 222","Second Floor","Laboratory","Computer laboratory."],
-["Classroom","Room 223","Second Floor","Classroom","CSE floor."],
-["Training and Placement Cell","Room 224","Second Floor","Placement","T&P Cell; T&P Head Room is beside it."],
-["T&P Head Room","Beside Room 224","Second Floor","Placement","Beside Training and Placement Cell."],
-["Girls Washroom","Room 225","Second Floor","Washroom","Girls washroom."],
-["Boys Washroom","Beside Middle Steps","Second Floor","Washroom","CSE side, next to middle steps."],
-["Men's Washroom","Room 301","Third Floor","Washroom","ECE floor."],
-["Classrooms","Rooms 302–303","Third Floor","Classroom","ECE floor classrooms."],
-["MBA HOD Department","Room 304","Third Floor","Department","MBA department HOD."],
-["Computer Labs","Rooms 305–306","Third Floor","Laboratory","Computer laboratories."],
-["Microwave and Optical Communications Lab","Room 307","Third Floor","Laboratory","ECE laboratory."],
-["AICA & STLD Lab ECE","Room 308","Third Floor","Laboratory","ECE laboratory."],
-["Classroom","Room 309","Third Floor","Classroom","ECE floor."],
-["ECE HOD Department","Room 310","Third Floor","Department","ECE department HOD."],
-["Classroom","Room 311","Third Floor","Classroom","ECE floor."],
-["First Aid Cum Sickroom","Room 313","Third Floor","Medical","First aid and sickroom."],
-["MP&MC Lab ECE","Room 314","Third Floor","Laboratory","ECE laboratory."],
-["Simulation Lab ECE","Room 315","Third Floor","Laboratory","ECE simulation laboratory."],
-["Classroom","Room 316","Third Floor","Classroom","ECE floor."],
-["ECE Seminar Hall","Room 317","Third Floor","Hall","ECE seminar hall."],
-["Staff Room","Room 320","Third Floor","Staff Room","Steps are beside this staff room."],
-["Ladies Staff Room","Room 321","Third Floor","Staff Room","Ladies staff room."],
-["Classroom","Room 322","Third Floor","Classroom","ECE floor."],
-["Gents Staff Room","Room 323","Third Floor","Staff Room","Gents staff room."],
-["Tutorial Hall","Room 324","Third Floor","Hall","Tutorial hall."],
-["Boys Washroom","Room 325","Third Floor","Washroom","Boys washroom."],
-["Classroom","Room 326","Third Floor","Classroom","ECE floor."],
-["Girls Washroom","Beside steps","Third Floor","Washroom","Girls washroom beside the steps."],
-["Drinking Water Point","Beside steps","Third Floor","Facility","Drinking water area."],
-["Men's Washroom","Room 401","Fourth Floor","Washroom","AI&DS / DS floor."],
-["Classrooms","Rooms 402–404","Fourth Floor","Classroom","AI&DS / DS floor."],
-["EDC & ECA Lab","Room 405","Fourth Floor","Laboratory","Laboratory."],
-["Classroom","Room 406","Fourth Floor","Classroom","AI&DS / DS floor."],
-["Classroom","Room 407","Fourth Floor","Classroom","AI&DS / DS floor."],
-["Control Systems and Power Electronics Lab","Room 408","Fourth Floor","Laboratory","Laboratory."],
-["Classroom","Room 409","Fourth Floor","Classroom","AI&DS / DS floor."],
-["S&H Department Staffroom","Room 410","Fourth Floor","Staff Room","Science and Humanities staffroom."],
-["Classroom","Room 411","Fourth Floor","Classroom","AI&DS / DS floor."],
-["AI&DS Staffroom","Room 412","Fourth Floor","Staff Room","AI&DS staffroom."],
-["Physics Lab","Room 413","Fourth Floor","Laboratory","Physics laboratory."],
-["Classroom","Room 414","Fourth Floor","Classroom","AI&DS / DS floor."],
-["AI&DS HOD Department","Room 415","Fourth Floor","Department","AI&DS department HOD."],
-["Classroom","Room 416","Fourth Floor","Classroom","AI&DS / DS floor."],
-["Chemistry Lab","Room 417","Fourth Floor","Laboratory","Chemistry laboratory."],
-["Classroom","Room 418","Fourth Floor","Classroom","AI&DS / DS floor."],
-["Men's Washroom","Room 419","Fourth Floor","Washroom","Steps are beside this washroom."],
-["DS Staffroom","Room 420","Fourth Floor","Staff Room","Data Science staffroom."],
-["Seminar Hall","Room 421","Fourth Floor","Hall","Seminar hall."],
-["DS Classroom","Room 422","Fourth Floor","Classroom","Data Science classroom."],
-["DS HOD Department","Room 423","Fourth Floor","Department","Data Science department HOD."],
-["Classroom","Room 424","Fourth Floor","Classroom","AI&DS / DS floor."],
-["Girls Washroom","Room 425","Fourth Floor","Washroom","Girls washroom."]
-];
-function showTab(id){document.getElementById("campus").classList.toggle("hidden",id!=="campus");document.getElementById("friends").classList.toggle("hidden",id!=="friends");if(id==="friends"&&map)setTimeout(()=>map.invalidateSize(),100)}
-function searchPlaces(){const q=document.getElementById("search").value.toLowerCase().trim(),f=document.getElementById("floor").value,c=document.getElementById("category").value;const list=places.filter(p=>(!f||p[2]===f)&&(!c||p[3]===c)&&p.join(" ").toLowerCase().includes(q));document.getElementById("placeCount").textContent=list.length+" places found";document.getElementById("places").innerHTML=list.length?list.map(p=>`<article class="place"><span class="tag">${p[3]}</span><h3>${p[0]}</h3><p><b>Room / landmark:</b> ${p[1]}</p><p><b>Floor:</b> ${p[2]}</p><p>${p[4]}</p></article>`).join(""):"<p>No places found. Try another search.</p>"}
-let map=null,marker=null,watchId=null;
-function initMap(){if(map)return;map=L.map("map").setView([16.7107,81.0952],16);L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"&copy; OpenStreetMap contributors"}).addTo(map)}
-function getMyLocation(){const msg=document.getElementById("gpsMessage");if(!navigator.geolocation){msg.textContent="This browser does not support GPS.";return}if(!window.isSecureContext){msg.textContent="GPS requires localhost or an HTTPS website.";return}initMap();msg.textContent="Requesting location permission...";navigator.geolocation.getCurrentPosition(pos=>{const lat=pos.coords.latitude,lng=pos.coords.longitude;map.setView([lat,lng],18);if(marker)marker.setLatLng([lat,lng]);else marker=L.marker([lat,lng]).addTo(map);marker.bindPopup("Your location on this device").openPopup();msg.textContent="Your GPS is shown on this device only. It has not been shared with friends.";},()=>{msg.textContent="Could not get location. Allow browser location permission and try again."},{enableHighAccuracy:true,timeout:15000})}
-function stopGps(){if(watchId!==null){navigator.geolocation.clearWatch(watchId);watchId=null}document.getElementById("gpsMessage").textContent="GPS tracking stopped. This starter page does not share your location."}
-function renderFriends(){document.getElementById("friendsList").innerHTML="<p class='muted'>Live friend search will work after secure sign-in and a shared database are connected.</p>"}
-searchPlaces();
-  // Firebase setup
-const firebaseConfig = {
-  apiKey: "AIzaSyBkQJf4lgJ9S0xZgT3w_DG2tZV12uujNRo",
-  authDomain: "campus-finder-af727.firebaseapp.com",
-  projectId: "campus-finder-af727",
-  storageBucket: "campus-finder-af727.firebasestorage.app",
-  messagingSenderId: "1111047626",
-  appId: "1:1111047626:web:8b1bb1c39121999493a333",
-  measurementId: "G-ZZSB5QPT1X"
-};
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+import {initializeApp} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+import {getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,onAuthStateChanged} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+import {getFirestore,doc,setDoc,deleteDoc,collection,onSnapshot} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+const firebaseConfig={
+apiKey:"AIzaSyBkQJf4lgJ9S0xZgT3w_DG2tZV12uujNRo",
+authDomain:"campus-finder-af727.firebaseapp.com",
+projectId:"campus-finder-af727",
+storageBucket:"campus-finder-af727.firebasestorage.app",
+messagingSenderId:"1111047626",
+appId:"1:1111047626:web:8b1bb1c39121999493a333",
+measurementId:"G-ZZSB5QPT1X"
+};
+const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
+const places=[
+["Main Entrance Gate","Ground Floor","Main campus entrance"],
+["Canteen","Ground Floor","Food and refreshments"],
+["Power Room","Ground Floor","Near canteen"],
+["Staff Bike Parking","Ground Floor","Staff parking area"],
+["Library - Room 101","Ground Floor","Opposite Principal cabin"],
+["Mechanical Classroom - Room 102","Ground Floor","Mechanical classroom"],
+["S&H HOD Room - Room 103","Ground Floor","Science and Humanities"],
+["Principal Room - Room 106","Ground Floor","Principal office"],
+["College Office - Room 107","Ground Floor","College office"],
+["EEE Classrooms - Rooms 116-117","Ground Floor","EEE department"],
+["Training and Placement Cell - Room 121","Ground Floor","Placement office"],
+["Girls Waiting Hall - Room 201","Second Floor","CSE floor"],
+["CSE Computer Lab - Room 206","Second Floor","Computer laboratory"],
+["CSE HOD - Room 207","Second Floor","Department office"],
+["CSE Seminar Hall - Room 208","Second Floor","Seminar hall"],
+["Training and Placement Room - Room 224","Second Floor","Placement office"],
+["ECE Computer Lab - Room 305","Third Floor","ECE laboratory"],
+["ECE Lab - Room 306","Third Floor","ECE laboratory"],
+["ECE Seminar Hall - Room 317","Third Floor","Seminar hall"],
+["AI&DS Classroom - Room 401","Fourth Floor","AI and Data Science"],
+["AI&DS Classroom - Room 415","Fourth Floor","AI&DS HOD nearby"],
+["DS Classroom - Room 422","Fourth Floor","Data Science classroom"],
+["DS HOD - Room 423","Fourth Floor","Data Science office"]
+];
+window.showTab=id=>{document.getElementById("campus").classList.toggle("hidden",id!=="campus");document.getElementById("friends").classList.toggle("hidden",id!=="friends");if(id==="friends")setTimeout(()=>map.invalidateSize(),100)};
+window.searchPlaces=()=>{const q=document.getElementById("search").value.toLowerCase(),f=document.getElementById("floor").value;const list=places.filter(p=>(p.join(" ").toLowerCase().includes(q))&&(!f||p[1]===f));document.getElementById("results").innerHTML=list.length?list.map(p=>'<div class="place"><b>'+p[0]+'</b><br><span class="muted">'+p[1]+' · '+p[2]+'</span></div>').join(""):"No places found."};
+searchPlaces();
+let map=L.map("map").setView([16.7107,81.0952],15);
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"© OpenStreetMap"}).addTo(map);
+let myMarker=null,watchId=null,stopFriends=null,friendMarkers=[];
+const msg=t=>document.getElementById("authMsg").textContent=t;
+window.signup=async()=>{try{await createUserWithEmailAndPassword(auth,email.value.trim(),password.value);msg("Account created. You are signed in.");}catch(e){msg(e.message)}};
+window.login=async()=>{try{await signInWithEmailAndPassword(auth,email.value.trim(),password.value);msg("Signed in successfully.");}catch(e){msg(e.message)}};
+window.logout=async()=>{await stopSharing();await signOut(auth);msg("Signed out.")};
+onAuthStateChanged(auth,user=>{msg(user?"Signed in: "+user.email:"Not signed in.");if(stopFriends){stopFriends();stopFriends=null}if(user){stopFriends=onSnapshot(collection(db,"sharedLocations"),snap=>{friendMarkers.forEach(m=>map.removeLayer(m));friendMarkers=[];document.getElementById("friendList").innerHTML="";snap.forEach(d=>{const v=d.data();if(d.id!==user.uid&&v.active&&v.lat&&v.lng){const m=L.marker([v.lat,v.lng]).addTo(map).bindPopup(v.name||"Campus friend");friendMarkers.push(m);document.getElementById("friendList").innerHTML+='<div class="place">'+(v.name||"Campus friend")+' · Location shared</div>'}});if(!document.getElementById("friendList").innerHTML)document.getElementById("friendList").textContent="No friends are sharing right now."},e=>document.getElementById("friendList").textContent="Database access error: "+e.message)}else document.getElementById("friendList").textContent="Sign in to view shared locations."});
+window.shareLocation=()=>{const user=auth.currentUser;if(!user){document.getElementById("gpsMsg").textContent="Please sign in first.";return}if(!navigator.geolocation){document.getElementById("gpsMsg").textContent="GPS is not available in this browser.";return}document.getElementById("gpsMsg").textContent="Requesting location permission...";watchId=navigator.geolocation.watchPosition(async pos=>{try{const lat=pos.coords.latitude,lng=pos.coords.longitude;myMarker?myMarker.setLatLng([lat,lng]):myMarker=L.marker([lat,lng]).addTo(map).bindPopup("Your location");map.setView([lat,lng],16);await setDoc(doc(db,"sharedLocations",user.uid),{name:user.email,lat,lng,active:true,updatedAt:Date.now()});document.getElementById("gpsMsg").textContent="Your location is being shared. Press Stop sharing when finished."}catch(e){document.getElementById("gpsMsg").textContent="Database error: "+e.message}},e=>document.getElementById("gpsMsg").textContent="GPS error: "+e.message,{enableHighAccuracy:true})};
+window.stopSharing=async()=>{if(watchId!==null){navigator.geolocation.clearWatch(watchId);watchId=null}if(auth.currentUser){try{await deleteDoc(doc(db,"sharedLocations",auth.currentUser.uid))}catch(e){}}document.getElementById("gpsMsg").textContent="Location sharing stopped."};
 </script>
 </body>
 </html>
